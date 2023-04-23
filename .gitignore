@@ -1,0 +1,12 @@
+dist/
+__pycache__/
+src/airflow*
+src/logs
+src/standalone_admin_password.txt
+credentials.json
+override-values.yaml
+.env
+kubeconfig
+kubernetes/fernet.yaml
+model.joblib
+kubectl

@@ -1,0 +1,8 @@
+# Ignore everything by default
+*
+
+# Allow files explicitly
+!pyproject.toml
+!poetry.lock
+!poetry.toml
+!Dockerfile

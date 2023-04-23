@@ -1,0 +1,108 @@
+images:
+  gitSync:
+    repository: registry.k8s.io/git-sync/git-sync
+    tag: v3.6.0
+    pullPolicy: Always
+  airflow:
+    repository: us-west2-docker.pkg.dev/akee-376111/akee-docker/akee-predict
+    tag: latest
+    pullPolicy: Always
+executor: KubernetesExecutor
+config:
+  logging:
+    remote_logging: "True"
+    remote_base_log_folder: "gs://akee-dataflow/logs/"
+    remote_log_conn_id: "google_cloud"
+
+  webserver:
+    expose_config: "True"
+  core:
+    parallelism: 96
+    max_active_tasks_per_dag: 96
+    max_active_runs_per_dag: 96
+    remote_logging: "True"
+    enable_xcom_pickling: "True"
+  celery:
+    worker_concurrency: 96
+
+airflowHome: /opt/airflow
+fernetKeySecretName: my-fernet-key-secret
+
+dags:
+  persistence:
+    enabled: false
+  gitSync:
+    enabled: true
+
+    # git repo clone url
+    # ssh example: git@github.com:apache/airflow.git
+    # https example: https://github.com/apache/airflow.git
+    repo: https://lewistham9x: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@github.com/lewistham9x/akee-predict-v2.git
+    branch: main
+    rev: HEAD
+    depth: 1
+    # the number of consecutive failures allowed before aborting
+    maxFailures: 0
+    # subpath within the repo where dags are located
+    # should be "" if dags are at repo root
+    subPath: "src/dags"
+
+    containerName: git-sync
+    uid: 65533
+
+    # When not set, the values defined in the global securityContext will be used
+    securityContext: {}
+    #  runAsUser: 65533
+    #  runAsGroup: 0
+
+    extraVolumeMounts: []
+    env: []
+    # Supported env vars for gitsync can be found at https://github.com/kubernetes/git-sync
+    # - name: ""
+    #   value: ""
+
+    resources: {}
+    #  limits:
+    #   cpu: 100m
+    #   memory: 128Mi
+    #  requests:
+    #   cpu: 100m
+    #   memory: 128Mi
+env:
+  - name: "AIRFLOW_VAR_PROJECT_ID"
+    value: "akee-376111"
+  - name: "AIRFLOW_VAR_DATASET_NAME"
+    value: "akee_us"
+  - name: "AIRFLOW_VAR_SENTIMENT_TABLE"
+    value: "sentiment"
+  - name: "AIRFLOW_VAR_GCS_BUCKET"
+    value: "akee-dataflow"
+  - name: "AIRFLOW_VAR_NFT_TABLE"
+    value: "nft_collection"
+  - name: "AIRFLOW_VAR_NFT_PRICE_TABLE"
+    value: "nft_price"
+  - name: "AIRFLOW_VAR_NFT_PRICE_TABLE"
+    value: "nft_price"
+  - name: "AIRFLOW_VAR_PREDICTION_TABLE"
+    value: "nft_prediction"
+  - name: "AIRFLOW_VAR_MODEL_TABLE"
+    value: "nft_model"
+  - name: "AIRFLOW_VAR_BIGQUERY_CONNECTION_STRING"
+    value: "bigquery://akee-376111"
+  # - name: "AIRFLOW__KUBERNETES__DELETE_WORKER_PODS"
+  #   value: "true"
+  - name: "AIRFLOW_VAR_ACT_PROXY_API"
+    value: ""
+  - name: "AIRFLOW_VAR_PROXY_USER"
+    value: ""
+  - name: "AIRFLOW_VAR_PROXY"
+    value: ""
+  - name: "HTTPS_PROXY"
+    value: ""
+
+logs:
+  persistence:
+    # Enable persistent volume for storing logs
+    enabled: true
+    size: 20Gi
+    existingClaim: logs-airflow-worker-0

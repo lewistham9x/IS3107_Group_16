@@ -1,0 +1,75 @@
+@startuml
+
+actor "User" as user
+
+participant ": Airflow" as airflow
+participant ": DataRetrievalTask" as data_task
+participant ": GCS" as gcs
+participant ": BigQuery" as bq
+participant ": SentimentAnalysisTask" as sentiment_task
+participant ": InferencePipelineTask" as inference_task
+participant ": VertexAI" as vertex_ai
+
+== Data Retrieval Flow ==
+
+user -> airflow : Trigger Data Retrieval
+activate airflow
+airflow -> data_task : getNFTS()
+activate data_task
+data_task -> gcs : writeGCS()
+activate gcs
+gcs -> bq : writeBigQuery()
+activate bq
+bq --> gcs : returnStatus(status)
+deactivate bq
+gcs --> data_task : returnStatus(status)
+deactivate gcs
+data_task --> airflow : returnStatus(status)
+deactivate data_task
+
+== Sentiment Analysis Flow ==
+
+user -> airflow : Trigger Sentiment Analysis
+activate airflow
+airflow -> sentiment_task : inferSentiment()
+activate sentiment_task
+sentiment_task -> gcs : writeGCS()
+activate gcs
+gcs -> bq : writeBigQuery()
+activate bq
+bq --> gcs : returnStatus(status)
+deactivate bq
+gcs --> sentiment_task : returnStatus(status)
+deactivate gcs
+sentiment_task --> airflow : returnStatus(status)
+deactivate sentiment_task
+
+== Inference Pipeline Flow ==
+
+user -> airflow : Trigger Inference Pipeline
+activate airflow
+airflow -> inference_task : readBigQuery()
+activate inference_task
+inference_task -> vertex_ai : Deployed Model
+activate vertex_ai
+vertex_ai -> gcs : writeGCS()
+activate gcs
+gcs -> bq : writeBigQuery()
+activate bq
+bq --> gcs : returnStatus(status)
+deactivate bq
+gcs --> vertex_ai : returnStatus(status)
+deactivate gcs
+vertex_ai --> inference_task : returnStatus(status)
+deactivate vertex_ai
+inference_task --> airflow : returnStatus(status)
+deactivate inference_task
+
+== Analysis ==
+
+user -> bq : Analyze NFT Price Predictions
+activate bq
+bq --> user : returnResults(results)
+deactivate bq
+
+@enduml

@@ -1,0 +1,17 @@
+version: "3.8"
+
+services:
+  webserver:
+    platform: linux/amd64
+    build:
+      context: .
+    command: webserver
+    image: "gcr.io/akee-376111/akee-predict:latest"
+    environment:
+      AIRFLOW__CORE__EXECUTOR: "LocalExecutor"
+      AIRFLOW__CORE__SQL_ALCHEMY_CONN: "postgresql+psycopg2://airflow:airflow@postgres:5432/airflow"
+      AIRFLOW__CORE__LOAD_EXAMPLES: "False"
+    volumes:
+      - ./dags:/opt/airflow/dags
+    ports:
+      - 8080:8080
