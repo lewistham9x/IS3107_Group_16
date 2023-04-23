@@ -37,7 +37,7 @@ dags:
     # git repo clone url
     # ssh example: git@github.com:apache/airflow.git
     # https example: https://github.com/apache/airflow.git
-    repo: https://lewistham9x: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@github.com/lewistham9x/akee-predict-v2.git
+    repo: https://lewistham9x@github.com/lewistham9x/akee-predict-v2.git
     branch: main
     rev: HEAD
     depth: 1
